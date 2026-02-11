@@ -50,7 +50,7 @@ export default function App() {
       {data && data.results.length > 0 && (
         <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
       )}
-      {data && data.total_pages > 1 && (
+      {totalPages > 1 && (
         <ReactPaginate
           pageCount={totalPages}
           pageRangeDisplayed={5}
