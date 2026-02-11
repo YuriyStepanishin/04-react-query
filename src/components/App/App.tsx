@@ -21,7 +21,7 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query !== "",
@@ -29,10 +29,10 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (data && data.results.length === 0) {
+    if (isSuccess && data.results.length === 0) {
       toast.error("No movies found for your request.");
     }
-  }, [data]);
+  }, [isSuccess, data]);
 
   const handleSearch = (newQuery: string): void => {
     setQuery(newQuery);
@@ -47,10 +47,10 @@ export default function App() {
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
 
-      {data && data.results.length > 0 && (
+      {isSuccess && data.results.length > 0 && (
         <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
       )}
-      {totalPages > 1 && (
+      {isSuccess && totalPages > 1 && (
         <ReactPaginate
           pageCount={totalPages}
           pageRangeDisplayed={5}
