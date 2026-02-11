@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 import type { Movie } from "../../types/movie";
 import { fetchMovies } from "../../services/movieService";
@@ -11,6 +12,7 @@ import MovieModal from "../MovieModal/MovieModal";
 
 import { useQuery } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
+
 import css from "./App.module.css";
 
 export default function App() {
@@ -22,8 +24,14 @@ export default function App() {
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query !== "",
-    placeholderData: (previousData) => previousData,
+    placeholderData: { results: [], total_pages: 0 },
   });
+
+  useEffect(() => {
+    if (data && data.results.length === 0) {
+      toast.error("No movies found for your request.");
+    }
+  }, [data]);
 
   const handleSearch = (newQuery: string): void => {
     setQuery(newQuery);
@@ -41,10 +49,12 @@ export default function App() {
       )}
       {data && data.total_pages > 1 && (
         <ReactPaginate
-          pageCount={data.total_pages}
+          pageCount={data?.total_pages ?? 0}
           pageRangeDisplayed={5}
           marginPagesDisplayed={1}
-          onPageChange={({ selected }) => setPage(selected + 1)}
+          onPageChange={(event: { selected: number }) =>
+            setPage(event.selected + 1)
+          }
           forcePage={page - 1}
           containerClassName={css.pagination}
           activeClassName={css.active}
